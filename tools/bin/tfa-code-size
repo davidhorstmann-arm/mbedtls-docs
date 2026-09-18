@@ -90,8 +90,18 @@ class Configuration:
     def bl_subpaths(self, options: list[str]):
         debug_or_release = 'debug' if 'DEBUG=1' in options else 'release'
 
-        bl1 = 'build/fvp/' + debug_or_release + '/bl1/bl1.elf'
-        bl2 = 'build/fvp/' + debug_or_release + '/bl2/bl2.elf'
+        PLAT_OPTION_RE = r'^PLAT=([a-zA-Z0-9]+)$'
+        plat = None
+        for option in options:
+            m = re.match(PLAT_OPTION_RE, option)
+            if m is not None:
+                plat = m.group(1)
+
+        if plat is None:
+            raise Exception('Could not find platform!')
+
+        bl1 = 'build/' + plat + '/' + debug_or_release + '/bl1/bl1.elf'
+        bl2 = 'build/' + plat + '/' + debug_or_release + '/bl2/bl2.elf'
 
         return bl1, bl2
 
