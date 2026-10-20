@@ -34,6 +34,8 @@ class Configuration:
             self.tfa_ci_dir = self.ensure_cloned(TFA_CI_URL, 'tf-a-ci-scripts')
 
         self.mbedtls_dir = self.tfa_dir + '/contrib/mbed-tls'
+        # Fetch all branches and tags
+        self.fetch_all_info(self.mbedtls_dir)
 
         if self.tfa_commit_name == None:
             self.tfa_commit = self.get_git_commit(self.tfa_dir)
@@ -61,10 +63,19 @@ class Configuration:
             subprocess.check_call(git_cmd, cwd=clone_dir)
 
         # In all cases ensure we have fresh information
-        git_cmd = ['git', 'fetch', '--all']
-        subprocess.check_call(git_cmd, cwd=clone_dir)
+        self.fetch_all_info(clone_dir)
 
         return clone_dir
+
+    def fetch_all_info(self, git_dir):
+        print('Fetching all info in ' + git_dir)
+        git_cmd = ['git',
+                   # Fetch everything even though we are single-branch
+                   # by default
+                   '-c',
+                   'remote.origin.fetch=+refs/heads/*:refs/remotes/origin/*',
+                   'fetch', '--all']
+        subprocess.check_call(git_cmd, cwd=git_dir)
 
     def get_git_commit(self, directory: str):
         git_cmd = ['git', 'rev-parse', '--short', 'HEAD']
