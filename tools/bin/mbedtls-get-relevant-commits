@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+
+import argparse
+import subprocess
+import sys
+
+def get_rev_list(base, tip):
+    git_cmd = ['git', 'rev-list',
+               base + '..' + tip]
+    out = str(subprocess.check_output(git_cmd), 'utf-8')
+    revisions = out.splitlines()
+    return revisions
+
+def get_files_changed(revision):
+    git_cmd = ['git', 'diff-tree',
+               '--no-commit-id', '--name-only', '-r',
+               revision]
+    out = str(subprocess.check_output(git_cmd), 'utf-8')
+    files = out.splitlines()
+    return files
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('base')
+    parser.add_argument('tip')
+    args = parser.parse_args()
+
+    relevant_revs = []
+    for rev in get_rev_list(args.base, args.tip):
+        for file in get_files_changed(rev):
+            if (not file.startswith('tests/')
+                and not file.startswith('docs/')
+                and not file.startswith('ChangeLog.d/')):
+                relevant_revs.append(rev)
+                break
+
+    print(' '.join(reversed(relevant_revs)))
+
+if __name__ == '__main__':
+    sys.exit(main())
