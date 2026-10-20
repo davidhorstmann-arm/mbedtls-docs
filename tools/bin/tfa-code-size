@@ -58,7 +58,7 @@ class Configuration:
 
             git_cmd = ['git', 'submodule', 'update',
                        '--init', '--recursive']
-            subprocess.check_call(git_cmd)
+            subprocess.check_call(git_cmd, cwd=clone_dir)
 
         # In all cases ensure we have fresh information
         git_cmd = ['git', 'fetch', '--all']
